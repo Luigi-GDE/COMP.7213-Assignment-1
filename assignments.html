@@ -1,0 +1,1064 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Assignment Manager – Toi Ohomai HUB</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    /* ===== MOODLE COLOUR TOKENS ===== */
+    :root {
+      --teal:        #1a7a6e;
+      --teal-dark:   #145f56;
+      --teal-light:  #e8f4f2;
+      --teal-border: #b8ddd8;
+      --bg:          #f4f4f4;
+      --white:       #ffffff;
+      --text:        #333333;
+      --text-muted:  #6a737b;
+      --border:      #dee2e6;
+      --row-alt:     #f8f8f8;
+      --red:         #c0392b;
+      --amber:       #e8a020;
+      --green:       #3d9970;
+    }
+
+    /* ===== RESET ===== */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: var(--bg);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      color: var(--text);
+      font-size: 14px;
+    }
+
+    /* ===== HEADER ===== */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 20px;
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+      z-index: 10;
+    }
+
+    .header-back a {
+      text-decoration: none;
+      color: var(--teal);
+      font-size: 13px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+    .header-back a:hover { color: var(--teal-dark); text-decoration: underline; }
+
+    .header-logo {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: 0.5px;
+    }
+
+    /* ===== MAIN LAYOUT ===== */
+    .app-body {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* ===== LEFT SIDEBAR ===== */
+    .sidebar {
+      width: 280px;
+      flex-shrink: 0;
+      background: var(--white);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .sidebar-header {
+      padding: 14px 14px 10px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+      background: var(--teal);
+    }
+
+    .sidebar-header h2 {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--white);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .sidebar-header h2 i { color: rgba(255,255,255,0.8); }
+
+    .filter-select {
+      width: 100%;
+      padding: 6px 10px;
+      border: 1px solid rgba(255,255,255,0.4);
+      border-radius: 4px;
+      font-size: 13px;
+      font-family: inherit;
+      color: var(--text);
+      background: var(--white);
+      cursor: pointer;
+      outline: none;
+      transition: border-color 0.12s;
+    }
+    .filter-select:focus { border-color: var(--teal); }
+
+    .assignment-list {
+      overflow-y: auto;
+      flex: 1;
+      padding: 0;
+    }
+
+    .assignment-item {
+      padding: 12px 14px;
+      background: var(--white);
+      cursor: pointer;
+      transition: background 0.1s;
+      border-bottom: 1px solid var(--border);
+      border-left: 4px solid transparent;
+    }
+    .assignment-item:hover { background: var(--teal-light); }
+    .assignment-item.active {
+      background: var(--teal-light);
+      border-left-color: var(--teal);
+    }
+    .assignment-item.status-overdue  { border-left-color: var(--red); }
+    .assignment-item.status-overdue.active { border-left-color: var(--red); }
+    .assignment-item.status-pending  { border-left-color: var(--amber); }
+    .assignment-item.status-done     { border-left-color: var(--green); }
+    .assignment-item.status-upcoming { border-left-color: var(--teal); }
+
+    .item-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--teal);
+      margin-bottom: 2px;
+      line-height: 1.35;
+    }
+    .assignment-item:hover .item-title,
+    .assignment-item.active .item-title { text-decoration: underline; }
+
+    .item-course {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+    .item-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .item-progress-wrap {
+      flex: 1;
+      height: 5px;
+      background: #e0e0e0;
+      border-radius: 3px;
+      margin-right: 10px;
+      overflow: hidden;
+    }
+    .item-progress-bar {
+      height: 100%;
+      border-radius: 3px;
+      background: var(--teal);
+      transition: width 0.3s;
+    }
+    .item-progress-bar.overdue  { background: var(--red); }
+    .item-progress-bar.pending  { background: var(--amber); }
+    .item-progress-bar.done     { background: var(--green); }
+    .item-progress-bar.upcoming { background: var(--teal); }
+
+    .item-due {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+    .item-due.overdue { color: var(--red); }
+
+    /* ===== DETAIL PANEL ===== */
+    .detail-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      background: var(--bg);
+    }
+
+    .detail-empty {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #bbb;
+      gap: 12px;
+    }
+    .detail-empty i { font-size: 52px; color: #d8d8d8; }
+    .detail-empty p { font-size: 15px; color: var(--text-muted); }
+
+    .detail-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* Assignment header bar */
+    .detail-header {
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+      padding: 18px 28px 14px;
+      flex-shrink: 0;
+    }
+    .detail-header-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    .detail-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.3;
+      flex: 1;
+      margin-right: 20px;
+    }
+    .detail-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 14px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      flex-shrink: 0;
+    }
+    .ds-overdue  { background: #fde8e6; color: var(--red); border: 1px solid #f5c6c2; }
+    .ds-pending  { background: #fff4e0; color: #9a6000; border: 1px solid #fde8b0; }
+    .ds-done     { background: #eaf6ec; color: #2d7a40; border: 1px solid #b8e0c0; }
+    .ds-upcoming { background: var(--teal-light); color: var(--teal); border: 1px solid var(--teal-border); }
+
+    .detail-meta {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+    .detail-meta span { display: flex; align-items: center; gap: 5px; }
+    .detail-meta i { color: var(--teal); }
+
+    .detail-progress-wrap {
+      height: 8px;
+      background: #e0e0e0;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .detail-progress-bar {
+      height: 100%;
+      border-radius: 4px;
+      background: var(--teal);
+      transition: width 0.4s ease;
+    }
+    .progress-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 4px;
+      text-align: right;
+    }
+
+    /* ===== TABS ===== */
+    .tabs-bar {
+      display: flex;
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .tab-btn {
+      padding: 10px 20px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -1px;
+      transition: color 0.12s;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+    .tab-btn:hover { color: var(--teal); }
+    .tab-btn.active { color: var(--teal); border-bottom-color: var(--teal); }
+    .tab-btn i { font-size: 13px; }
+
+    .tab-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 22px 28px;
+      background: var(--bg);
+    }
+    .tab-pane { display: none; }
+    .tab-pane.active { display: block; }
+
+    /* ===== TASKS TAB ===== */
+    .task-add-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .task-input {
+      flex: 1;
+      padding: 8px 12px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-size: 13px;
+      font-family: inherit;
+      color: var(--text);
+      background: var(--white);
+      outline: none;
+      transition: border-color 0.12s;
+    }
+    .task-input:focus { border-color: var(--teal); box-shadow: 0 0 0 2px rgba(26,122,110,0.15); }
+
+    .add-task-btn {
+      padding: 8px 16px;
+      background: var(--teal);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.12s;
+    }
+    .add-task-btn:hover { background: var(--teal-dark); }
+
+    .tasks-section-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      margin-top: 4px;
+      padding-bottom: 4px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .task-list { list-style: none; margin-bottom: 20px; }
+
+    .task-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      margin-bottom: 5px;
+    }
+    .task-item.completed { opacity: 0.55; }
+
+    .task-checkbox {
+      width: 18px;
+      height: 18px;
+      border: 2px solid #c0c0c8;
+      border-radius: 3px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: background 0.12s, border-color 0.12s;
+    }
+    .task-checkbox.checked { background: var(--teal); border-color: var(--teal); }
+    .task-checkbox i { font-size: 10px; color: white; display: none; }
+    .task-checkbox.checked i { display: block; }
+
+    .task-text {
+      flex: 1;
+      font-size: 13px;
+      color: var(--text);
+    }
+    .task-item.completed .task-text { text-decoration: line-through; color: #aaa; }
+
+    .task-delete {
+      color: #ccc;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 13px;
+      padding: 2px 5px;
+      border-radius: 3px;
+      transition: color 0.12s;
+    }
+    .task-delete:hover { color: var(--red); }
+
+    /* ===== NOTES TAB ===== */
+    .notes-textarea {
+      width: 100%;
+      min-height: 280px;
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-size: 13px;
+      font-family: inherit;
+      color: var(--text);
+      background: var(--white);
+      resize: vertical;
+      outline: none;
+      line-height: 1.6;
+      transition: border-color 0.12s;
+    }
+    .notes-textarea:focus { border-color: var(--teal); box-shadow: 0 0 0 2px rgba(26,122,110,0.15); }
+
+    .notes-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 10px;
+    }
+    .notes-saved {
+      font-size: 11px;
+      color: var(--green);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .notes-saved.visible { opacity: 1; }
+
+    .save-btn {
+      padding: 7px 18px;
+      background: var(--teal);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      transition: background 0.12s;
+    }
+    .save-btn:hover { background: var(--teal-dark); }
+
+    /* ===== MATERIALS TAB ===== */
+    .materials-section { margin-bottom: 28px; }
+    .materials-section h3 {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--border);
+    }
+    .materials-section h3 i { color: var(--teal); }
+
+    .upload-area {
+      border: 2px dashed var(--teal-border);
+      border-radius: 4px;
+      padding: 24px;
+      text-align: center;
+      background: var(--white);
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .upload-area:hover { border-color: var(--teal); background: var(--teal-light); }
+    .upload-area i { font-size: 28px; color: var(--teal-border); margin-bottom: 8px; display: block; }
+    .upload-area p { font-size: 13px; color: var(--text-muted); margin-bottom: 4px; }
+    .upload-area span { font-size: 11px; color: #aaa; }
+    .upload-area input[type="file"] { display: none; }
+
+    .file-list { margin-top: 10px; }
+
+    .file-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 12px;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      margin-bottom: 5px;
+      font-size: 13px;
+      color: var(--text);
+    }
+    .file-item i { color: var(--teal); font-size: 15px; flex-shrink: 0; }
+    .file-item .file-name { flex: 1; }
+    .file-item .file-size { font-size: 11px; color: #aaa; }
+    .file-remove-btn {
+      color: #ccc;
+      background: none;
+      border: none;
+      cursor: pointer;
+      transition: color 0.12s;
+    }
+    .file-remove-btn:hover { color: var(--red); }
+
+    .snippet-add-row {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .snippet-title-input,
+    .snippet-textarea {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-size: 13px;
+      font-family: inherit;
+      color: var(--text);
+      background: var(--white);
+      outline: none;
+      transition: border-color 0.12s;
+    }
+    .snippet-title-input:focus,
+    .snippet-textarea:focus { border-color: var(--teal); box-shadow: 0 0 0 2px rgba(26,122,110,0.15); }
+    .snippet-textarea { min-height: 80px; resize: vertical; }
+
+    .snippet-add-btn {
+      align-self: flex-end;
+      padding: 7px 16px;
+      background: var(--teal);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.12s;
+    }
+    .snippet-add-btn:hover { background: var(--teal-dark); }
+
+    .snippet-list { margin-top: 14px; }
+
+    .snippet-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 12px 14px;
+      margin-bottom: 8px;
+      border-left: 4px solid var(--teal);
+    }
+    .snippet-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+    .snippet-card-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--teal);
+    }
+    .snippet-card-text {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.6;
+      white-space: pre-wrap;
+    }
+    .snippet-remove-btn {
+      color: #ccc;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 13px;
+      transition: color 0.12s;
+    }
+    .snippet-remove-btn:hover { color: #d93025; }
+
+    /* ===== SCROLLBARS ===== */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--teal-border); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--teal); }
+  </style>
+</head>
+<body>
+
+<!-- ===== HEADER ===== -->
+<header>
+  <div class="header-back">
+    <a href="index.html"><i class="fa-solid fa-arrow-left"></i> Back to HUB</a>
+  </div>
+  <div class="header-logo">
+    Assignment Manager
+  </div>
+  <div style="width:120px;"></div>
+</header>
+
+<!-- ===== APP BODY ===== -->
+<div class="app-body">
+
+  <!-- ===== SIDEBAR ===== -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <h2><i class="fa-solid fa-clipboard-list"></i> My Assignments</h2>
+      <select class="filter-select" onchange="filterAssignments(this.value)">
+        <option value="all">All Assignments</option>
+        <option value="pending">Pending</option>
+        <option value="done">Submitted</option>
+        <option value="overdue">Overdue</option>
+        <option value="upcoming">Upcoming</option>
+      </select>
+    </div>
+    <div class="assignment-list" id="assignmentList"></div>
+  </aside>
+
+  <!-- ===== DETAIL PANEL ===== -->
+  <main class="detail-panel" id="detailPanel">
+
+    <div class="detail-empty" id="emptyState">
+      <i class="fa-regular fa-folder-open"></i>
+      <p>Select an assignment to get started</p>
+    </div>
+
+    <div class="detail-content" id="detailContent" style="display:none;">
+
+      <!-- Assignment header -->
+      <div class="detail-header">
+        <div class="detail-header-top">
+          <div class="detail-title" id="detailTitle"></div>
+          <div class="detail-status" id="detailStatus"></div>
+        </div>
+        <div class="detail-meta" id="detailMeta"></div>
+        <div class="detail-progress-wrap">
+          <div class="detail-progress-bar" id="detailProgressBar" style="width:0%"></div>
+        </div>
+        <div class="progress-label" id="progressLabel">0% complete</div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="tabs-bar">
+        <button class="tab-btn active" data-tab="tasks" onclick="switchTab('tasks')">
+          <i class="fa-solid fa-list-check"></i> Tasks
+        </button>
+        <button class="tab-btn" data-tab="notes" onclick="switchTab('notes')">
+          <i class="fa-regular fa-note-sticky"></i> Notes
+        </button>
+        <button class="tab-btn" data-tab="materials" onclick="switchTab('materials')">
+          <i class="fa-solid fa-paperclip"></i> Materials
+        </button>
+      </div>
+
+      <div class="tab-content">
+
+        <!-- TASKS -->
+        <div class="tab-pane active" id="tab-tasks">
+          <div class="task-add-row">
+            <input class="task-input" id="newTaskInput" type="text"
+              placeholder="Add a task or to-do for this assignment…"
+              onkeydown="if(event.key==='Enter') addTask()">
+            <button class="add-task-btn" onclick="addTask()"><i class="fa-solid fa-plus"></i> Add</button>
+          </div>
+          <p class="tasks-section-label">To Do</p>
+          <ul class="task-list" id="todoList"></ul>
+          <p class="tasks-section-label">Completed</p>
+          <ul class="task-list" id="doneList"></ul>
+        </div>
+
+        <!-- NOTES -->
+        <div class="tab-pane" id="tab-notes">
+          <textarea class="notes-textarea" id="notesArea"
+            placeholder="Write your notes, ideas, or planning for this assignment here…"></textarea>
+          <div class="notes-footer">
+            <div class="notes-saved" id="notesSaved"><i class="fa-solid fa-circle-check"></i> Saved</div>
+            <button class="save-btn" onclick="saveNotes()"><i class="fa-solid fa-floppy-disk"></i> Save Notes</button>
+          </div>
+        </div>
+
+        <!-- MATERIALS -->
+        <div class="tab-pane" id="tab-materials">
+
+          <div class="materials-section">
+            <h3><i class="fa-solid fa-file-arrow-up"></i> Uploaded Files</h3>
+            <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+              <input type="file" id="fileInput" multiple onchange="handleFiles(this.files)">
+              <i class="fa-solid fa-cloud-arrow-up"></i>
+              <p>Click to upload files</p>
+              <span>PDF, Word, images, and more</span>
+            </div>
+            <div class="file-list" id="fileList"></div>
+          </div>
+
+          <div class="materials-section">
+            <h3><i class="fa-solid fa-quote-left"></i> Research Snippets</h3>
+            <div class="snippet-add-row">
+              <input class="snippet-title-input" id="snippetTitle" type="text" placeholder="Snippet title or source…">
+              <textarea class="snippet-textarea" id="snippetText"
+                placeholder="Paste or type your research snippet, quote, or reference here…"></textarea>
+              <button class="snippet-add-btn" onclick="addSnippet()"><i class="fa-solid fa-plus"></i> Add Snippet</button>
+            </div>
+            <div class="snippet-list" id="snippetList"></div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </main>
+
+</div>
+
+<script>
+  // ============================================
+  // DATA
+  // ============================================
+  const assignments = [
+    {
+      id: 1, title: "Research Essay – Introduction to Psychology",
+      course: "PSYC101", type: "Essay – 2500 words", due: "2026-04-12", status: "overdue",
+      tasks: [
+        { id: 1, text: "Draft introduction", done: true },
+        { id: 2, text: "Complete literature review", done: false },
+        { id: 3, text: "Write body paragraphs", done: false },
+        { id: 4, text: "Proofread and finalise", done: false }
+      ],
+      notes: "",
+      files: [],
+      snippets: [
+        { id: 1, title: "Piaget – Cognitive Development",
+          text: "Piaget's theory identifies four stages of cognitive development in children, emphasising that intelligence changes as children grow." }
+      ]
+    },
+    {
+      id: 2, title: "Group Presentation – Business Communications",
+      course: "BCOM201", type: "Presentation – 15 minutes", due: "2026-04-25", status: "pending",
+      tasks: [
+        { id: 1, text: "Assign roles to group members", done: true },
+        { id: 2, text: "Create slide deck", done: false },
+        { id: 3, text: "Practice run-through", done: false }
+      ],
+      notes: "", files: [], snippets: []
+    },
+    {
+      id: 3, title: "Lab Report – Environmental Science",
+      course: "ENSC301", type: "Report – 1500 words", due: "2026-04-30", status: "pending",
+      tasks: [
+        { id: 1, text: "Complete lab observations", done: true },
+        { id: 2, text: "Analyse data and graph results", done: false },
+        { id: 3, text: "Write up findings section", done: false },
+        { id: 4, text: "Format references correctly", done: false }
+      ],
+      notes: "", files: [], snippets: []
+    },
+    {
+      id: 4, title: "Case Study – Digital Marketing",
+      course: "MKTG102", type: "Essay – 1000 words", due: "2026-04-05", status: "done",
+      tasks: [
+        { id: 1, text: "Research chosen brand", done: true },
+        { id: 2, text: "Structure analysis using SWOT", done: true },
+        { id: 3, text: "Write and submit via Moodle", done: true }
+      ],
+      notes: "", files: [], snippets: []
+    },
+    {
+      id: 5, title: "Quiz 2 – Introduction to Programming",
+      course: "COMP110", type: "Online Quiz", due: "2026-04-01", status: "done",
+      tasks: [
+        { id: 1, text: "Revise loops and conditionals", done: true },
+        { id: 2, text: "Complete quiz on Moodle", done: true }
+      ],
+      notes: "", files: [], snippets: []
+    },
+    {
+      id: 6, title: "Reflection Journal – Nursing Practice",
+      course: "NURS210", type: "Journal – 800 words", due: "2026-05-10", status: "upcoming",
+      tasks: [], notes: "", files: [], snippets: []
+    }
+  ];
+
+  let currentId   = null;
+  let taskCtr     = 200;
+  let fileCtr     = 200;
+  let snippetCtr  = 200;
+  let currentFilter = 'all';
+
+  // ============================================
+  // SIDEBAR
+  // ============================================
+  function renderSidebar() {
+    const list = document.getElementById('assignmentList');
+    list.innerHTML = '';
+    const filtered = currentFilter === 'all'
+      ? assignments
+      : assignments.filter(a => a.status === currentFilter);
+
+    filtered.forEach(a => {
+      const pct = calcProgress(a);
+      const item = document.createElement('div');
+      item.className = `assignment-item status-${a.status}${a.id === currentId ? ' active' : ''}`;
+      item.onclick = () => openAssignment(a.id);
+      item.innerHTML = `
+        <div class="item-title">${escHtml(a.title)}</div>
+        <div class="item-course">${escHtml(a.course)} &nbsp;·&nbsp; ${escHtml(a.type)}</div>
+        <div class="item-footer">
+          <div class="item-progress-wrap">
+            <div class="item-progress-bar ${a.status}" style="width:${pct}%"></div>
+          </div>
+          <div class="item-due${a.status === 'overdue' ? ' overdue' : ''}">Due ${formatDate(a.due)}</div>
+        </div>`;
+      list.appendChild(item);
+    });
+  }
+
+  function calcProgress(a) {
+    if (!a.tasks.length) return a.status === 'done' ? 100 : 0;
+    return Math.round((a.tasks.filter(t => t.done).length / a.tasks.length) * 100);
+  }
+
+  function formatDate(str) {
+    return new Date(str).toLocaleDateString('en-NZ', { day: 'numeric', month: 'short', year: 'numeric' });
+  }
+
+  function filterAssignments(filter) {
+    currentFilter = filter;
+    renderSidebar();
+  }
+
+  // ============================================
+  // OPEN ASSIGNMENT
+  // ============================================
+  function openAssignment(id) {
+    currentId = id;
+    const a = assignments.find(x => x.id === id);
+
+    document.getElementById('emptyState').style.display = 'none';
+    document.getElementById('detailContent').style.display = 'flex';
+
+    const statusLabels = { overdue:'Overdue', pending:'In Progress', done:'Submitted', upcoming:'Upcoming' };
+    const statusIcons  = { overdue:'triangle-exclamation', pending:'clock', done:'circle-check', upcoming:'calendar' };
+
+    document.getElementById('detailTitle').textContent = a.title;
+
+    const ds = document.getElementById('detailStatus');
+    ds.className = `detail-status ds-${a.status}`;
+    ds.innerHTML = `<i class="fa-solid fa-${statusIcons[a.status]}"></i> ${statusLabels[a.status]}`;
+
+    document.getElementById('detailMeta').innerHTML = `
+      <span><i class="fa-solid fa-book"></i>${escHtml(a.course)}</span>
+      <span><i class="fa-solid fa-file-lines"></i>${escHtml(a.type)}</span>
+      <span><i class="fa-regular fa-calendar"></i>Due ${formatDate(a.due)}</span>`;
+
+    updateProgress(a);
+    renderTasks(a);
+    document.getElementById('notesArea').value = a.notes || '';
+    renderFiles(a);
+    renderSnippets(a);
+
+    switchTab('tasks');
+    renderSidebar();
+  }
+
+  function updateProgress(a) {
+    const pct = calcProgress(a);
+    const bar = document.getElementById('detailProgressBar');
+    bar.style.width = pct + '%';
+    const colours = { overdue:'#d93025', pending:'#e8a020', done:'#5cb85c', upcoming:'#1e7a6e' };
+    bar.style.background = colours[a.status] || '#1e7a6e';
+    document.getElementById('progressLabel').textContent = pct + '% complete';
+  }
+
+  // ============================================
+  // TABS
+  // ============================================
+  function switchTab(name) {
+    document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + name).classList.add('active');
+    document.querySelector(`.tab-btn[data-tab="${name}"]`).classList.add('active');
+  }
+
+  // ============================================
+  // TASKS
+  // ============================================
+  function renderTasks(a) {
+    const todo = document.getElementById('todoList');
+    const done = document.getElementById('doneList');
+    todo.innerHTML = '';
+    done.innerHTML = '';
+    a.tasks.forEach(t => (t.done ? done : todo).appendChild(buildTaskEl(a, t)));
+  }
+
+  function buildTaskEl(a, t) {
+    const li = document.createElement('li');
+    li.className = `task-item${t.done ? ' completed' : ''}`;
+    li.innerHTML = `
+      <div class="task-checkbox${t.done ? ' checked' : ''}" onclick="toggleTask(${a.id},${t.id})">
+        <i class="fa-solid fa-check"></i>
+      </div>
+      <span class="task-text">${escHtml(t.text)}</span>
+      <button class="task-delete" onclick="deleteTask(${a.id},${t.id})" title="Remove">
+        <i class="fa-solid fa-xmark"></i>
+      </button>`;
+    return li;
+  }
+
+  function addTask() {
+    const input = document.getElementById('newTaskInput');
+    const text = input.value.trim();
+    if (!text) return;
+    const a = assignments.find(x => x.id === currentId);
+    a.tasks.push({ id: ++taskCtr, text, done: false });
+    input.value = '';
+    renderTasks(a);
+    updateProgress(a);
+    renderSidebar();
+  }
+
+  function toggleTask(aId, tId) {
+    const a = assignments.find(x => x.id === aId);
+    const t = a.tasks.find(x => x.id === tId);
+    t.done = !t.done;
+    renderTasks(a);
+    updateProgress(a);
+    renderSidebar();
+  }
+
+  function deleteTask(aId, tId) {
+    const a = assignments.find(x => x.id === aId);
+    a.tasks = a.tasks.filter(x => x.id !== tId);
+    renderTasks(a);
+    updateProgress(a);
+    renderSidebar();
+  }
+
+  // ============================================
+  // NOTES
+  // ============================================
+  function saveNotes() {
+    const a = assignments.find(x => x.id === currentId);
+    a.notes = document.getElementById('notesArea').value;
+    const el = document.getElementById('notesSaved');
+    el.classList.add('visible');
+    setTimeout(() => el.classList.remove('visible'), 2000);
+  }
+
+  // ============================================
+  // FILES
+  // ============================================
+  function handleFiles(files) {
+    const a = assignments.find(x => x.id === currentId);
+    Array.from(files).forEach(f => {
+      a.files.push({ id: ++fileCtr, name: f.name, size: formatSize(f.size) });
+    });
+    renderFiles(a);
+    document.getElementById('fileInput').value = '';
+  }
+
+  function renderFiles(a) {
+    const list = document.getElementById('fileList');
+    list.innerHTML = '';
+    a.files.forEach(f => {
+      const div = document.createElement('div');
+      div.className = 'file-item';
+      div.innerHTML = `
+        <i class="fa-solid fa-file"></i>
+        <span class="file-name">${escHtml(f.name)}</span>
+        <span class="file-size">${escHtml(f.size)}</span>
+        <button class="file-remove-btn" onclick="removeFile(${a.id},${f.id})" title="Remove">
+          <i class="fa-solid fa-xmark"></i>
+        </button>`;
+      list.appendChild(div);
+    });
+  }
+
+  function removeFile(aId, fId) {
+    const a = assignments.find(x => x.id === aId);
+    a.files = a.files.filter(f => f.id !== fId);
+    renderFiles(a);
+  }
+
+  function formatSize(bytes) {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / 1048576).toFixed(1) + ' MB';
+  }
+
+  // ============================================
+  // SNIPPETS
+  // ============================================
+  function addSnippet() {
+    const title = document.getElementById('snippetTitle').value.trim();
+    const text  = document.getElementById('snippetText').value.trim();
+    if (!title && !text) return;
+    const a = assignments.find(x => x.id === currentId);
+    a.snippets.push({ id: ++snippetCtr, title: title || 'Untitled snippet', text });
+    document.getElementById('snippetTitle').value = '';
+    document.getElementById('snippetText').value = '';
+    renderSnippets(a);
+  }
+
+  function renderSnippets(a) {
+    const list = document.getElementById('snippetList');
+    list.innerHTML = '';
+    a.snippets.forEach(s => {
+      const div = document.createElement('div');
+      div.className = 'snippet-card';
+      div.innerHTML = `
+        <div class="snippet-card-header">
+          <span class="snippet-card-title">${escHtml(s.title)}</span>
+          <button class="snippet-remove-btn" onclick="removeSnippet(${a.id},${s.id})" title="Remove">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <div class="snippet-card-text">${escHtml(s.text)}</div>`;
+      list.appendChild(div);
+    });
+  }
+
+  function removeSnippet(aId, sId) {
+    const a = assignments.find(x => x.id === aId);
+    a.snippets = a.snippets.filter(s => s.id !== sId);
+    renderSnippets(a);
+  }
+
+  // ============================================
+  // UTILS
+  // ============================================
+  function escHtml(str) {
+    return String(str)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  // ============================================
+  // INIT
+  // ============================================
+  renderSidebar();
+</script>
+</body>
+</html>
