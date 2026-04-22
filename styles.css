@@ -318,3 +318,81 @@ a.tile {
   margin-top: 5px;
   text-transform: uppercase;
 }
+
+/* ===== RESPONSIVE – TABLET (≤ 900px) ===== */
+@media (max-width: 900px) {
+  .hub-grid {
+    grid-template-columns: repeat(5, 1fr);
+    grid-template-rows: none;
+    grid-auto-rows: 130px;
+  }
+
+  /* Reset all explicit placements */
+  .t-akonga-success, .t-moodle, .t-google, .t-it-help, .t-library,
+  .t-events, .t-voice, .t-access, .t-campus-svc, .t-fun, .t-print-bal,
+  .t-print-help, .t-timetable, .t-linkedin, .t-office, .t-results,
+  .t-personal, .t-pin, .t-emergencies, .t-email, .t-password, .t-maps,
+  .t-attendance, .t-alerts, .t-assignment {
+    grid-column: auto;
+    grid-row: auto;
+  }
+
+  /* Retain meaningful spans at tablet size */
+  .t-akonga-success { grid-column: span 2; }
+  .t-moodle         { grid-row: span 2; }
+  .t-google         { grid-row: span 2; }
+  .t-events         { grid-column: span 2; }
+  .t-results        { grid-column: span 2; }
+  .t-attendance     { grid-column: span 2; }
+  .t-assignment     { grid-column: span 2; }
+
+  .tile-icon { font-size: 30px; }
+  .moodle-m  { font-size: 52px; }
+  .google-g  { font-size: 42px; }
+}
+
+/* ===== RESPONSIVE – MOBILE (≤ 600px) ===== */
+@media (max-width: 600px) {
+  header {
+    padding: 10px 14px;
+  }
+
+  .header-logo {
+    font-size: 16px;
+    letter-spacing: 2px;
+    gap: 6px;
+  }
+
+  .header-icons { gap: 12px; }
+  .header-icons i { font-size: 15px; }
+
+  .hub-badge {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-width: 2px;
+  }
+
+  .hub-grid {
+    grid-template-columns: repeat(3, 1fr);
+    grid-auto-rows: 100px;
+  }
+
+  /* Reset all spans – uniform 3-column flow */
+  .t-akonga-success, .t-moodle, .t-google, .t-it-help, .t-library,
+  .t-events, .t-voice, .t-access, .t-campus-svc, .t-fun, .t-print-bal,
+  .t-print-help, .t-timetable, .t-linkedin, .t-office, .t-results,
+  .t-personal, .t-pin, .t-emergencies, .t-email, .t-password, .t-maps,
+  .t-attendance, .t-alerts, .t-assignment {
+    grid-column: auto;
+    grid-row: auto;
+  }
+
+  .tile-icon    { font-size: 24px; margin-bottom: 6px; }
+  .tile-label   { font-size: 10.5px; }
+  .moodle-m     { font-size: 36px; margin-bottom: 5px; }
+  .google-g     { font-size: 32px; margin-bottom: 5px; }
+  .linkedin-box { width: 38px; height: 38px; margin-bottom: 6px; }
+  .linkedin-box span { font-size: 18px; }
+  .sos-ring     { width: 40px; height: 40px; margin-bottom: 5px; }
+  .sos-ring span { font-size: 12px; }
+}

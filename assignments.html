@@ -606,20 +606,185 @@
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: var(--teal-border); border-radius: 3px; }
     ::-webkit-scrollbar-thumb:hover { background: var(--teal); }
+
+    /* ===== HAMBURGER BUTTON (hidden on desktop) ===== */
+    .hamburger-btn {
+      display: none;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--teal);
+      font-size: 20px;
+      padding: 4px 6px;
+      border-radius: 4px;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+    .hamburger-btn:hover { background: var(--teal-light); }
+
+    /* ===== SIDEBAR OVERLAY (hidden on desktop) ===== */
+    .sidebar-overlay {
+      display: none;
+    }
+
+    /* ===== HEADER LEFT WRAPPER ===== */
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .header-right {
+      width: 120px;
+      flex-shrink: 0;
+    }
+
+    /* ===== RESPONSIVE – TABLET (≤ 960px) ===== */
+    @media (max-width: 960px) {
+      .sidebar { width: 240px; }
+      .detail-title { font-size: clamp(15px, 2.2vw, 20px); }
+      .tab-content { padding: 18px 20px; }
+    }
+
+    /* ===== RESPONSIVE – MOBILE (≤ 768px) ===== */
+    @media (max-width: 768px) {
+
+      /* --- Body stays height:100vh so nothing overflows --- */
+      body { font-size: 13px; }
+
+      /* --- Header --- */
+      header { padding: 0 14px; height: 48px; position: relative; }
+      /* Absolutely centre the logo regardless of what's on either side */
+      .header-logo {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        font-size: clamp(13px, 4vw, 16px);
+        letter-spacing: 0;
+        white-space: nowrap;
+      }
+      /* Move back link to the right on mobile */
+      .header-back {
+        position: absolute;
+        right: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+      }
+      .header-back a { font-size: 0; gap: 0; }         /* hide text, keep arrow icon */
+      .header-back a i { font-size: 16px; }            /* icon stays visible */
+      .header-right { display: none; }                 /* no longer needed as spacer */
+
+      /* Show hamburger */
+      .hamburger-btn { display: flex; align-items: center; justify-content: center; }
+
+      /* --- Sidebar becomes a fixed off-canvas drawer --- */
+      .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: min(300px, 82vw);
+        z-index: 300;
+        transform: translateX(-100%);
+        transition: transform 0.25s ease;
+        box-shadow: 4px 0 24px rgba(0,0,0,0.18);
+        /* keep internal flex layout intact */
+      }
+      body.sidebar-open .sidebar {
+        transform: translateX(0);
+      }
+
+      /* --- Dark backdrop --- */
+      .sidebar-overlay {
+        display: block;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.45);
+        z-index: 299;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.25s ease;
+      }
+      body.sidebar-open .sidebar-overlay {
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      /* --- Detail panel fills full width --- */
+      .detail-panel {
+        flex: 1;
+        min-width: 0;
+        overflow: hidden;
+      }
+
+      /* --- Detail header --- */
+      .detail-header { padding: 12px 14px 10px; }
+      .detail-header-top { flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+      .detail-title {
+        font-size: clamp(14px, 4.5vw, 18px);
+        margin-right: 0;
+        width: 100%;
+      }
+      .detail-status { font-size: 11px; padding: 3px 10px; }
+      .detail-meta {
+        flex-wrap: wrap;
+        gap: 8px 14px;
+        font-size: 11px;
+        margin-bottom: 8px;
+      }
+      .progress-label { font-size: 10px; }
+
+      /* --- Tabs --- */
+      .tabs-bar { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+      .tab-btn  { padding: 10px 14px; font-size: 12px; white-space: nowrap; flex-shrink: 0; }
+      .tab-content { padding: 14px; }
+
+      /* --- Tasks --- */
+      .task-add-row { flex-direction: row; gap: 6px; margin-bottom: 14px; }
+      .task-input   { font-size: 13px; }
+      .add-task-btn { padding: 8px 12px; font-size: 12px; white-space: nowrap; flex-shrink: 0; }
+      .task-item    { padding: 9px 10px; }
+      .task-text    { font-size: 12px; }
+      .tasks-section-label { font-size: 10px; }
+
+      /* --- Notes --- */
+      .notes-textarea { min-height: 160px; font-size: 13px; }
+      .notes-footer { margin-top: 8px; }
+
+      /* --- Materials --- */
+      .upload-area { padding: 18px 14px; }
+      .upload-area i { font-size: 22px; }
+      .upload-area p { font-size: 12px; }
+      .snippet-title-input,
+      .snippet-textarea { font-size: 13px; }
+      .snippet-add-btn { align-self: stretch; justify-content: center; font-size: 12px; }
+
+      /* --- Empty state --- */
+      .detail-empty i { font-size: 38px; }
+      .detail-empty p { font-size: 13px; }
+    }
   </style>
 </head>
 <body>
 
 <!-- ===== HEADER ===== -->
 <header>
-  <div class="header-back">
-    <a href="index.html"><i class="fa-solid fa-arrow-left"></i> Back to HUB</a>
+  <div class="header-left">
+    <button class="hamburger-btn" onclick="toggleSidebar()" aria-label="Open assignments list">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+    <div class="header-back">
+      <a href="index.html"><i class="fa-solid fa-arrow-left"></i> Back to HUB</a>
+    </div>
   </div>
   <div class="header-logo">
     Assignment Manager
   </div>
-  <div style="width:120px;"></div>
+  <div class="header-right"></div>
 </header>
+
+<!-- ===== SIDEBAR OVERLAY ===== -->
+<div class="sidebar-overlay" onclick="toggleSidebar()"></div>
 
 <!-- ===== APP BODY ===== -->
 <div class="app-body">
@@ -881,6 +1046,8 @@
 
     switchTab('tasks');
     renderSidebar();
+    // Close drawer on mobile after selecting
+    document.body.classList.remove('sidebar-open');
   }
 
   function updateProgress(a) {
@@ -1044,6 +1211,13 @@
     const a = assignments.find(x => x.id === aId);
     a.snippets = a.snippets.filter(s => s.id !== sId);
     renderSnippets(a);
+  }
+
+  // ============================================
+  // MOBILE SIDEBAR TOGGLE
+  // ============================================
+  function toggleSidebar() {
+    document.body.classList.toggle('sidebar-open');
   }
 
   // ============================================
