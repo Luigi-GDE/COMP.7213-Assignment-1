@@ -19,8 +19,8 @@
       --border:      #dee2e6;
       --row-alt:     #f8f8f8;
       --red:         #c0392b;
-      --amber:       #e8a020;
-      --green:       #3d9970;
+      --amber:       #f5c518;
+      --green:       #32cd32;
     }
 
     /* ===== RESET ===== */
@@ -252,8 +252,8 @@
       flex-shrink: 0;
     }
     .ds-overdue  { background: #fde8e6; color: var(--red); border: 1px solid #f5c6c2; }
-    .ds-pending  { background: #fff4e0; color: #9a6000; border: 1px solid #fde8b0; }
-    .ds-done     { background: #eaf6ec; color: #2d7a40; border: 1px solid #b8e0c0; }
+    .ds-pending  { background: #fffde0; color: #7a6000; border: 1px solid #f5e060; }
+    .ds-done     { background: #f0ffe0; color: #228b22; border: 1px solid #90e050; }
     .ds-upcoming { background: var(--teal-light); color: var(--teal); border: 1px solid var(--teal-border); }
 
     .detail-meta {
@@ -1054,7 +1054,7 @@
     const pct = calcProgress(a);
     const bar = document.getElementById('detailProgressBar');
     bar.style.width = pct + '%';
-    const colours = { overdue:'#d93025', pending:'#e8a020', done:'#5cb85c', upcoming:'#1e7a6e' };
+    const colours = { overdue:'#d93025', pending:'#f5c518', done:'#32cd32', upcoming:'#1e7a6e' };
     bar.style.background = colours[a.status] || '#1e7a6e';
     document.getElementById('progressLabel').textContent = pct + '% complete';
   }
